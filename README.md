@@ -3,6 +3,7 @@
 This demo shows an equivalent of the Cisco IOS-XR route-policy wth arguments feature - constructs like:
 
 **IOS-XR:**
+
 	route-policy RP-EBGP-EXPORT ($tag)
 	    if destionation in PFX-$tag then
 	        set community CM-$tag additive
