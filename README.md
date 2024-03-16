@@ -220,47 +220,47 @@ set policy-options community CM-1201 members 65000:1201
 **DO NOT COMMIT** - rather, obtain the XML format of the policy-statement using: **show policy-options | display xml**, which gives:
 
 <pre>
-<rpc-reply xmlns:junos="http://xml.juniper.net/junos/24.1R1.2/junos">
-    <configuration junos:changed-seconds="1710597605" junos:changed-localtime="2024-03-16 15:00:05 CET">
-            <policy-options>
-                <route-filter-list>
-                    <name>RFL-1201</name>
-                    <rf_list>
-                        <address>15.0.0.0/8</address>
-                        <orlonger/>
-                    </rf_list>
-                </route-filter-list>
-                <policy-statement>
-                    <name>PS-EBGP-EXPORT-1201</name>
-                    <term>
-                        <name>ACCEPT-1201</name>
-                        <from>
-                            <route-filter-list>
-                                <name>RFL-1201</name>
-                            </route-filter-list>
-                        </from>
-                        <then>
-                            <community>
-                                <add/>
-                                <community-name>CM-1201</community-name>
-                            </community>
-                            <accept/>
-                        </then>
-                    </term>
-                    <then>
-                        <reject/>
-                    </then>
-                </policy-statement>
-                <community>
-                    <name>CM-1201</name>
-                    <members>65000:1201</members>
-                </community>
-            </policy-options>
-    </configuration>
-    <cli>
-        <banner>[edit]</banner>
-    </cli>
-</rpc-reply>
+&lt;rpc-reply xmlns:junos="http://xml.juniper.net/junos/24.1R1.2/junos"&gt;
+    &lt;configuration junos:changed-seconds="1710597605" junos:changed-localtime="2024-03-16 15:00:05 CET"&gt;
+            &lt;policy-options&gt;
+                &lt;route-filter-list&gt;
+                    &lt;name&gt;RFL-1201&lt;/name&gt;
+                    &lt;rf_list&gt;
+                        &lt;address&gt;15.0.0.0/8&lt;/address&gt;
+                        &lt;orlonger/&gt;
+                    &lt;/rf_list&gt;
+                &lt;/route-filter-list&gt;
+                &lt;policy-statement&gt;
+                    &lt;name&gt;PS-EBGP-EXPORT-1201&lt;/name&gt;
+                    &lt;term&gt;
+                        &lt;name&gt;ACCEPT-1201&lt;/name&gt;
+                        &lt;from&gt;
+                            &lt;route-filter-list&gt;
+                                &lt;name&gt;RFL-1201&lt;/name&gt;
+                            &lt;/route-filter-list&gt;
+                        &lt;/from&gt;
+                        &lt;then&gt;
+                            &lt;community&gt;
+                                &lt;add/&gt;
+                                &lt;community-name&gt;CM-1201&lt;/community-name&gt;
+                            &lt;/community&gt;
+                            &lt;accept/&gt;
+                        &lt;/then&gt;
+                    &lt;/term&gt;
+                    &lt;then&gt;
+                        &lt;reject/&gt;
+                    &lt;/then&gt;
+                &lt;/policy-statement&gt;
+                &lt;community&gt;
+                    &lt;name&gt;CM-1201&lt;/name&gt;
+                    &lt;members&gt;65000:1201&lt;/members&gt;
+                &lt;/community&gt;
+            &lt;/policy-options&gt;
+    &lt;/configuration&gt;
+    &lt;cli&gt;
+        &lt;banner&gt;[edit]&lt;/banner&gt;
+    &lt;/cli&gt;
+&lt;/rpc-reply&gt;
 </pre>
 
 Based on the template above, you can create the script:
