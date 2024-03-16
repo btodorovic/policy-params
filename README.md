@@ -272,42 +272,42 @@ ns junos = "http://xml.juniper.net/junos/*/junos";
 ns xnm = "http://xml.juniper.net/xnm/1.1/xnm";
 ns jcs = "http://xml.juniper.net/junos/commit-scripts/1.0";
 import "../import/junos.xsl";
- 
+
 match configuration {
     var $root = policy-options;
     for-each ($root/apply-macro[data/name = 'name']) {
-        var $policy_name = data[name = 'name']/value;      ### Policy name obtained here
+        var $policy_name = data[name = 'name']/value;
 
         /* --- Template for policies named PS-EBGP-IMPORT-nnnnn are defined here -- */
 
         if ($policy_name == 'PS-EBGP-EXPORT') {
-            <transient-change> {
-                <policy-options> {
+            &lt;transient-change&gt; {
+                &lt;policy-options&gt; {
                     for-each (data[not(value)]/name) {
-                        <policy-statement> {
-                            <name>$policy_name _ '-' _ .;
-                            <term> {
-                                <name>'ACCEPT-' _ .;
-                                <from> {
-                                    <route-filter-list> {
-                                        <name>'RFL-' _ .;
+                        &lt;policy-statement&gt; {
+                            &lt;name&gt;$policy_name _ '-' _ .;
+                            &lt;term&gt; {
+                                &lt;name&gt;'ACCEPT-' _ .;
+                                &lt;from&gt; {
+                                    &lt;route-filter-list&gt; {
+                                        &lt;name&gt;'RFL-' _ .;
                                     }
                                 }
-                                <then> {
-                                    <community> {
-                                        <add>;
-                                        <community-name> 'CM-' _ .;
+                                &lt;then&gt; {
+                                    &lt;community&gt; {
+                                        &lt;add&gt;;
+                                        &lt;community-name&gt; 'CM-' _ .;
                                     }
-                                    <accept>;
-                                }   
+                                    &lt;accept&gt;;
+                                }
                             }
-                            <then> {
-                                <reject>;
+                            &lt;then&gt; {
+                                &lt;reject&gt;;
                             }
                         }
-                        <community> {
-                            <name> 'CM-' _ .;
-                            <members>'65000:' _ .;
+                        &lt;community&gt; {
+                            &lt;name&gt; 'CM-' _ .;
+                            &lt;members&gt;'65000:' _ .;
                         }
                     }
                 }
