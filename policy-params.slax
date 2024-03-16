@@ -1,0 +1,78 @@
+/* -----------------------------------------------------------------------------------------
+ *    policy-params.slax - Demo of Junos OS implementation of Cisco IOS-XR route-policies
+ *                         with arguments - things like:
+ *
+ *                         route-policy TEMPLATE($arg1, $arg2)
+ *
+ *      Author           - Berislav Todorovic, <btodorovic@juniper.net>
+ *
+ *      Usage            - Copy the script into /var/db/scripts/commit and install it on
+ *                         the Junos OS device using:
+ *
+ *                         set system scripts commit allow-transients
+ *                         set system scripts commit file policy-params.slax
+ *
+ *                         Define route-filter-lists manually, as you wish.
+ *                         Community lists are built automatically from the macro, though
+ *
+ * -----------------------------------------------------------------------------------------
+ */
+          
+version 1.0;
+ns junos = "http://xml.juniper.net/junos/*/junos";
+ns xnm = "http://xml.juniper.net/xnm/1.1/xnm";
+ns jcs = "http://xml.juniper.net/junos/commit-scripts/1.0";
+import "../import/junos.xsl";
+ 
+match configuration {
+    var $root = policy-options;
+    for-each ($root/apply-macro[data/name = 'name']) {
+        var $policy_name = data[name = 'name']/value;
+
+        /* --- Template for policies named PS-EBGP-IMPORT-nnnnn are defined here -- */
+
+        if ($policy_name == 'PS-EBGP-EXPORT') {
+            <transient-change> {
+                <policy-options> {
+                    for-each (data[not(value)]/name) {
+                        <policy-statement> {
+                            <name>$policy_name _ '-' _ .;
+                            <term> {
+                                <name>'ACCEPT-' _ .;
+                                <from> {
+                                    <route-filter-list> {
+                                        <name>'RFL-' _ .;
+                                    }
+                                }
+                                <then> {
+                                    <community> {
+                                        <add>;
+                                        <community-name> 'CM-' _ .;
+                                    }
+                                    <accept>;
+                                }   
+                            }
+                            <then> {
+                                <reject>;
+                            }
+                        }
+                        <community> {
+                            <name> 'CM-' _ .;
+                            <members>'65000:' _ .;
+                        }
+                    }
+                }
+            }
+        }
+
+        /* --- Template for policies named PS-EBGP-IMPORT-nnnnn are defined here -- */
+
+        else if ($policy_name == 'PS-EBGP-IMPORT') {
+            /*
+             * --- Template code goes here ... etc.
+             */
+        }
+
+        /* --- Add similar templates here, as required --- */
+    }
+}
