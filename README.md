@@ -58,7 +58,46 @@ Let's start from the latter step - in the example above we will use the argument
 	    }
 	}
 
-Also, create route-filter-lists manually:
+In general, each macro consists of a list of (key, value) tuples - e.g.
+
+<pre>
+apply-macro MC-101 {
+    name 101;
+    color blue;
+    community 65300:123;
+    as-path "65000 12 13 14";
+    prefix 100.64.0.0/16;
+}
+apply-macro MC-102 {
+    name 102;
+    color blue;
+    community 65300:30112;
+    as-path "65000 2032";
+    prefix 100.127.0.0/16;
+}
+...
+</pre>
+
+We can iterate macro names from the SLAX script using a for-each loop - e.g.:
+<pre>
+match configuration {
+    <transient-change> {
+        <policy-options> {
+            var $root = policy-options;
+            for-each ($root/apply-macro[data/name = 'name']) {
+                var $cust_name  = data[name = 'name']/value;
+                var $color      = data[name = 'color']/value;
+                var $community  = data[name = 'community']/value;
+                var $as_path    = data[name = 'as-path']/value;
+                var $prefix     = data[name = 'prefix']/value;
+
+                <policy-statement> {
+                    <name>'PS-EBGP-CUST-' _ $cust_name _ '-EXPORT';
+                    ...
+
+</pre>
+
+Now, create route-filter-lists manually:
 
 <pre>
 policy-options {
