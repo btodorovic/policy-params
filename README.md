@@ -36,6 +36,7 @@ In the example below we assume that the "template" policy should look like this:
 	        }
 	        then reject;
 	    }
+	}
 
 Regrettably, we cannot apply this template directly into the router CLI, but we can do the following:
 
@@ -182,3 +183,146 @@ policy-options {
 }
 </pre>
 
+## Tips for Developing the Script
+
+The easiest way to create the template is to create a prototype policy manually first. For instance:
+
+<pre>
+policy-options {
+    policy-statement PS-EBGP-EXPORT-1201 {
+        term ACCEPT-1201 {
+            from {
+                route-filter-list RFL-1201;
+            }
+            then {
+                community add CM-1201;
+                accept;
+            }
+        }
+        then reject;
+    }
+    route-filter-list RFL-1201 15.0.0.0/8 orlonger;
+    community CM-1201 members 65000:1201;
+}
+</pre>
+
+To impleement this, you will probably use the standard Junos CLI set-commands - i.e.:
+
+<pre>
+set policy-options route-filter-list RFL-1201 15.0.0.0/8 orlonger
+set policy-options policy-statement PS-EBGP-EXPORT-1201 term ACCEPT-1201 from route-filter-list RFL-1201
+set policy-options policy-statement PS-EBGP-EXPORT-1201 term ACCEPT-1201 then community add CM-1201
+set policy-options policy-statement PS-EBGP-EXPORT-1201 term ACCEPT-1201 then accept
+set policy-options policy-statement PS-EBGP-EXPORT-1201 then reject
+set policy-options community CM-1201 members 65000:1201
+</pre>
+
+**DO NOT COMMIT** - rather, obtain the XML format of the policy-statement using: **show policy-options | display xml**, which gives:
+
+<pre>
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/24.1R1.2/junos">
+    <configuration junos:changed-seconds="1710597605" junos:changed-localtime="2024-03-16 15:00:05 CET">
+            <policy-options>
+                <route-filter-list>
+                    <name>RFL-1201</name>
+                    <rf_list>
+                        <address>15.0.0.0/8</address>
+                        <orlonger/>
+                    </rf_list>
+                </route-filter-list>
+                <policy-statement>
+                    <name>PS-EBGP-EXPORT-1201</name>
+                    <term>
+                        <name>ACCEPT-1201</name>
+                        <from>
+                            <route-filter-list>
+                                <name>RFL-1201</name>
+                            </route-filter-list>
+                        </from>
+                        <then>
+                            <community>
+                                <add/>
+                                <community-name>CM-1201</community-name>
+                            </community>
+                            <accept/>
+                        </then>
+                    </term>
+                    <then>
+                        <reject/>
+                    </then>
+                </policy-statement>
+                <community>
+                    <name>CM-1201</name>
+                    <members>65000:1201</members>
+                </community>
+            </policy-options>
+    </configuration>
+    <cli>
+        <banner>[edit]</banner>
+    </cli>
+</rpc-reply>
+</pre>
+
+Based on the template above, you can create the script:
+
+<pre>
+/* === Standard header === */
+version 1.0;
+ns junos = "http://xml.juniper.net/junos/*/junos";
+ns xnm = "http://xml.juniper.net/xnm/1.1/xnm";
+ns jcs = "http://xml.juniper.net/junos/commit-scripts/1.0";
+import "../import/junos.xsl";
+ 
+match configuration {
+    var $root = policy-options;
+    for-each ($root/apply-macro[data/name = 'name']) {
+        var $policy_name = data[name = 'name']/value;      ### Policy name obtained here
+
+        /* --- Template for policies named PS-EBGP-IMPORT-nnnnn are defined here -- */
+
+        if ($policy_name == 'PS-EBGP-EXPORT') {
+            <transient-change> {
+                <policy-options> {
+                    for-each (data[not(value)]/name) {
+                        <policy-statement> {
+                            <name>$policy_name _ '-' _ .;
+                            <term> {
+                                <name>'ACCEPT-' _ .;
+                                <from> {
+                                    <route-filter-list> {
+                                        <name>'RFL-' _ .;
+                                    }
+                                }
+                                <then> {
+                                    <community> {
+                                        <add>;
+                                        <community-name> 'CM-' _ .;
+                                    }
+                                    <accept>;
+                                }   
+                            }
+                            <then> {
+                                <reject>;
+                            }
+                        }
+                        <community> {
+                            <name> 'CM-' _ .;
+                            <members>'65000:' _ .;
+                        }
+                    }
+                }
+            }
+        }
+
+        /* --- Template for policies named PS-EBGP-IMPORT-nnnnn are defined here -- */
+
+        else if ($policy_name == 'PS-EBGP-IMPORT') {
+            /*
+             * --- Template code goes here ... etc.
+             */
+        }
+
+        /* --- Add similar templates here, as required --- */
+    }
+}
+</pre>
