@@ -11,11 +11,11 @@ This demo shows an equivalent of the Cisco IOS-XR route-policy wth arguments fea
 	        drop
 	    endif
 	end-policy
-
+	!
 	route-policy RP-EBGP-EXPORT-1234
 	    apply RP-EBGP-EXPORT(1234)
 	endif
-
+	!
 	route-policy RP-EBGP-EXPORT-5678
 	    apply RP-EBGP-EXPORT(5678)
 	endif
